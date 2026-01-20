@@ -12,9 +12,9 @@ export default function BottomNav() {
   const isActive = (path) => pathname === path;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t border-ocean-100/30 py-3 pb-safe px-6 z-50 shadow-[0_-10px_40px_-15px_rgba(186,230,253,0.3)] overflow-hidden">
+    <div className="fixed bottom-0 left-0 right-0 border-t border-ocean-100/30 py-3 pb-safe px-6 z-50 shadow-[0_-10px_40px_-15px_rgba(186,230,253,0.3)] overflow-hidden bg-white/95 backdrop-blur-xl">
       
-      {/* --- CSS das Ondas (Injetado aqui para funcionar sem config global) --- */}
+      {/* --- CSS das Ondas --- */}
       <style jsx>{`
         .wave-container {
           position: absolute;
@@ -60,13 +60,11 @@ export default function BottomNav() {
         }
       `}</style>
 
-      {/* --- Estrutura das Ondas --- */}
       <div className="wave-container">
         <div className="wave wave-back"></div>
         <div className="wave wave-front"></div>
       </div>
 
-      {/* --- Conteúdo dos Ícones (z-10 para ficar acima das ondas) --- */}
       <div className="flex justify-between items-center max-w-lg mx-auto md:max-w-2xl relative z-10">
         
         {/* 1. INÍCIO */}
@@ -81,14 +79,14 @@ export default function BottomNav() {
           </span>
         </Link>
 
-        {/* 2. LOJA */}
-        <Link href="/#collection" className="flex flex-col items-center gap-1 group w-16 py-1">
+        {/* 2. LOJA - Redireciona para /shop */}
+        <Link href="/shop" className="flex flex-col items-center gap-1 group w-16 py-1">
           <Store 
             size={28} 
-            className="text-slate-400/80 group-hover:text-ocean-800 transition-all duration-300 group-hover:scale-110" 
-            strokeWidth={2}
+            className={`transition-all duration-300 ${isActive('/shop') ? 'text-ocean-950 fill-ocean-950/10 scale-110' : 'text-slate-400/80 group-hover:text-ocean-800 group-hover:scale-105'}`} 
+            strokeWidth={isActive('/shop') ? 2.5 : 2}
           />
-          <span className="text-[11px] font-medium text-slate-400/80">
+          <span className={`text-[11px] font-medium transition-colors ${isActive('/shop') ? 'text-ocean-950' : 'text-slate-400/80'}`}>
             Loja
           </span>
         </Link>

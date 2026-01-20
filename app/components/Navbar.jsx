@@ -2,14 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { Menu, Globe, X, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [pathname, setPathname] = useState('/');
+
+  // Obter o caminho atual de forma segura (compatível com o ambiente de preview)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setPathname(window.location.pathname);
+    }
+  }, []);
   
-  const pathname = usePathname();
   const isHomePage = pathname === '/';
 
   // Detetar o Scroll
@@ -23,18 +28,22 @@ export default function Navbar() {
 
   const closeMenu = () => setIsMenuOpen(false);
 
-  // --- LÓGICA DE ESTILOS ---
+  // --- LÓGICA DE ESTILOS UNIFICADA ---
   const getNavClasses = () => {
-    if (isHomePage) {
-      return isScrolled 
-        ? 'bg-white/95 backdrop-blur-md shadow-sm py-2 text-ocean-950' // Ao descer
-        : 'bg-transparent py-4 text-white drop-shadow-md'; // No topo
+    // 1. Estado Transparente: Apenas na Home e quando está no topo
+    if (isHomePage && !isScrolled) {
+      return 'bg-transparent py-4 text-white drop-shadow-md';
     }
-    // Outras páginas
-    return 'bg-ocean-950 py-4 text-white shadow-md';
+    
+    // 2. Estado Padrão (Branco): Para Home (com scroll) e TODAS as outras páginas
+    return 'bg-white/95 backdrop-blur-md shadow-sm py-2 text-ocean-950';
   };
 
-  const hoverClass = (isHomePage && isScrolled) ? 'hover:bg-slate-100' : 'hover:bg-white/20';
+  // O Logo só deve ser invertido (Branco) na Home no Topo.
+  const shouldInvertLogo = isHomePage && !isScrolled;
+
+  // Cor de fundo dos botões ao passar o rato
+  const hoverClass = (isHomePage && !isScrolled) ? 'hover:bg-white/20' : 'hover:bg-slate-100';
 
   return (
     <>
@@ -54,23 +63,25 @@ export default function Navbar() {
 
         {/* Centro: Logotipo */}
         <div className="relative z-10 flex-shrink-0 mx-2">
-          <Link href="/">
+          <a href="/">
             <img 
               src="https://i.ibb.co/TzyqgkH/Gemini-Generated-Image-2xxali2xxali2xxa-removebg-preview.png" 
               alt="DeWhiteSun Logo" 
-              className="h-24 md:h-28 w-auto object-contain transition-transform duration-300 hover:scale-105 drop-shadow-sm"
+              className={`h-24 md:h-28 w-auto object-contain transition-all duration-300 hover:scale-105 drop-shadow-sm
+                ${shouldInvertLogo ? 'brightness-0 invert' : ''} 
+              `}
             />
-          </Link>
+          </a>
         </div>
 
         {/* Lado Direito: Apenas o Globo (Perfil) */}
         <div className="flex-1 flex justify-end items-center relative z-10 gap-2 md:gap-3">
-          <Link 
+          <a 
             href="/profile" 
-            className={`p-2 rounded-full transition-colors ${hoverClass}`}
+            className={`p-2 rounded-full transition-colors inline-block ${hoverClass}`}
           >
             <Globe size={24} strokeWidth={1.5} />
-          </Link>
+          </a>
         </div>
       </header>
 
@@ -97,7 +108,7 @@ export default function Navbar() {
               { label: 'Sobre Nós', href: '/about' },
               { label: 'Contato', href: '/contact' },
             ].map((link) => (
-              <Link 
+              <a 
                 key={link.label}
                 href={link.href} 
                 onClick={closeMenu}
@@ -105,14 +116,14 @@ export default function Navbar() {
               >
                 <span className="font-serif text-lg">{link.label}</span>
                 <ChevronRight size={16} className="text-slate-300 group-hover:text-gold-400" />
-              </Link>
+              </a>
             ))}
           </nav>
 
           <div className="mt-auto pt-8 border-t border-slate-100">
-             <Link href="/profile" onClick={closeMenu} className="block text-center bg-ocean-950 text-white py-3 rounded-lg font-bold uppercase text-sm tracking-widest hover:bg-ocean-800 transition-colors">
+             <a href="/profile" onClick={closeMenu} className="block text-center bg-ocean-950 text-white py-3 rounded-lg font-bold uppercase text-sm tracking-widest hover:bg-ocean-800 transition-colors">
                A minha Conta
-             </Link>
+             </a>
           </div>
         </div>
       </div>
