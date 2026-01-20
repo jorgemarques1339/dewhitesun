@@ -1,12 +1,8 @@
 import { Playfair_Display, Lato } from "next/font/google";
 import "./globals.css";
-
-// Importar Contextos
-import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
-
-// Importar a Barra Inferior
-import BottomNav from "./components/BottomNav"; 
+import { AuthProvider } from "./context/AuthContext";
+import BottomNav from "./components/BottomNav";
 
 const playfair = Playfair_Display({ 
   subsets: ["latin"],
@@ -24,7 +20,12 @@ export const metadata = {
   description: "Ocean Lifestyle Store",
 };
 
-export default function RootLayout({ children }) {
+// A CORREÇÃO ESTÁ AQUI: Adicionámos ": { children: React.ReactNode }"
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="pt">
       <body className={`${playfair.variable} ${lato.variable} bg-slate-50 text-ocean-950`}>
@@ -32,12 +33,12 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <CartProvider>
             
-            {/* O padding-bottom (pb-24) é crucial para o conteúdo não ficar escondido atrás da barra */}
+            {/* Espaço extra no fundo (pb-24) para a barra fixa não tapar nada */}
             <div className="pb-24"> 
               {children}
             </div>
             
-            {/* A BARRA TEM DE ESTAR AQUI */}
+            {/* A Barra Inferior Fixa */}
             <BottomNav />
             
           </CartProvider>
