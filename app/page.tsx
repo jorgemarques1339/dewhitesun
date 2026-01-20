@@ -45,7 +45,7 @@ export default function Home() {
       <div id="collection" className="py-20 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="font-serif text-3xl md:text-4xl text-ocean-950 mb-4">
-            Curadoria Exclusiva
+            Novos Lançamentos
           </h2>
           <div className="w-24 h-1 bg-gold-400 mx-auto rounded-full"></div>
           <p className="mt-4 text-slate-500 font-light max-w-lg mx-auto">
