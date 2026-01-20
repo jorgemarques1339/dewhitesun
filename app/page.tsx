@@ -8,20 +8,26 @@ import { ShoppingBag, Heart, Loader2 } from 'lucide-react';
 // Importar os Componentes
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import Values from './components/Values'; // <--- IMPORTAR AQUI
-// Footer removido daqui pois está no layout ou já não queres na home
+import Values from './components/Values';
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
+  // CORREÇÃO AQUI: Adicionámos <any[]> para o TypeScript aceitar os dados
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchProducts() {
       const { data, error } = await supabase.from('products').select('*');
-      if (error) console.error('Erro:', error);
-      else setProducts(data);
+      
+      if (error) {
+        console.error('Erro ao buscar produtos:', error);
+      } else {
+        // O "|| []" garante que não passamos null se a base de dados estiver vazia
+        setProducts(data || []);
+      }
       setLoading(false);
     }
+
     fetchProducts();
   }, []);
 
@@ -32,14 +38,14 @@ export default function Home() {
       {/* 1. Banner Principal */}
       <Hero />
 
-      {/* 2. NOSSOS VALORES (Inserido aqui) */}
+      {/* 2. NOSSOS VALORES */}
       <Values />
 
       {/* 3. Lista de Produtos */}
       <div id="collection" className="py-20 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="font-serif text-3xl md:text-4xl text-ocean-950 mb-4">
-            NOVOS LANÇAMENTOS
+            Curadoria Exclusiva
           </h2>
           <div className="w-24 h-1 bg-gold-400 mx-auto rounded-full"></div>
           <p className="mt-4 text-slate-500 font-light max-w-lg mx-auto">
