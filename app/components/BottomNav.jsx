@@ -11,6 +11,7 @@ export default function BottomNav() {
 
   const isActive = (path) => pathname === path;
 
+  // Cor do Logótipo: #C4A67C
   return (
     <div className="fixed bottom-0 left-0 right-0 border-t border-ocean-100/30 py-3 pb-safe px-6 z-50 shadow-[0_-10px_40px_-15px_rgba(186,230,253,0.3)] overflow-hidden bg-white/95 backdrop-blur-xl">
       
@@ -71,22 +72,22 @@ export default function BottomNav() {
         <Link href="/" className="flex flex-col items-center gap-1 group w-16 py-1">
           <Home 
             size={28} 
-            className={`transition-all duration-300 ${isActive('/') ? 'text-ocean-950 fill-ocean-950/10 scale-110' : 'text-slate-400/80 group-hover:text-ocean-800 group-hover:scale-105'}`} 
+            className={`transition-all duration-300 ${isActive('/') ? 'text-[#C4A67C] fill-[#C4A67C]/10 scale-110' : 'text-slate-400/80 group-hover:text-[#C4A67C] group-hover:scale-105'}`} 
             strokeWidth={isActive('/') ? 2.5 : 2}
           />
-          <span className={`text-[11px] font-medium transition-colors ${isActive('/') ? 'text-ocean-950' : 'text-slate-400/80'}`}>
+          <span className={`text-[11px] font-medium transition-colors ${isActive('/') ? 'text-[#C4A67C]' : 'text-slate-400/80'}`}>
             Início
           </span>
         </Link>
 
-        {/* 2. LOJA - Redireciona para /shop */}
+        {/* 2. LOJA */}
         <Link href="/shop" className="flex flex-col items-center gap-1 group w-16 py-1">
           <Store 
             size={28} 
-            className={`transition-all duration-300 ${isActive('/shop') ? 'text-ocean-950 fill-ocean-950/10 scale-110' : 'text-slate-400/80 group-hover:text-ocean-800 group-hover:scale-105'}`} 
+            className={`transition-all duration-300 ${isActive('/shop') ? 'text-[#C4A67C] fill-[#C4A67C]/10 scale-110' : 'text-slate-400/80 group-hover:text-[#C4A67C] group-hover:scale-105'}`} 
             strokeWidth={isActive('/shop') ? 2.5 : 2}
           />
-          <span className={`text-[11px] font-medium transition-colors ${isActive('/shop') ? 'text-ocean-950' : 'text-slate-400/80'}`}>
+          <span className={`text-[11px] font-medium transition-colors ${isActive('/shop') ? 'text-[#C4A67C]' : 'text-slate-400/80'}`}>
             Loja
           </span>
         </Link>
@@ -95,10 +96,10 @@ export default function BottomNav() {
         <Link href="/profile" className="flex flex-col items-center gap-1 group w-16 py-1">
           <User 
             size={28} 
-            className={`transition-all duration-300 ${isActive('/profile') ? 'text-ocean-950 fill-ocean-950/10 scale-110' : 'text-slate-400/80 group-hover:text-ocean-800 group-hover:scale-105'}`} 
+            className={`transition-all duration-300 ${isActive('/profile') ? 'text-[#C4A67C] fill-[#C4A67C]/10 scale-110' : 'text-slate-400/80 group-hover:text-[#C4A67C] group-hover:scale-105'}`} 
             strokeWidth={isActive('/profile') ? 2.5 : 2}
           />
-          <span className={`text-[11px] font-medium transition-colors ${isActive('/profile') ? 'text-ocean-950' : 'text-slate-400/80'}`}>
+          <span className={`text-[11px] font-medium transition-colors ${isActive('/profile') ? 'text-[#C4A67C]' : 'text-slate-400/80'}`}>
             Perfil
           </span>
         </Link>
@@ -108,7 +109,7 @@ export default function BottomNav() {
           <div className="relative">
             <ShoppingBag 
               size={28} 
-              className={`transition-all duration-300 ${isActive('/cart') ? 'text-ocean-950 fill-ocean-950/10 scale-110' : 'text-slate-400/80 group-hover:text-ocean-800 group-hover:scale-105'}`} 
+              className={`transition-all duration-300 ${isActive('/cart') ? 'text-[#C4A67C] fill-[#C4A67C]/10 scale-110' : 'text-slate-400/80 group-hover:text-[#C4A67C] group-hover:scale-105'}`} 
               strokeWidth={isActive('/cart') ? 2.5 : 2}
             />
             {cartCount > 0 && (
@@ -117,7 +118,7 @@ export default function BottomNav() {
               </span>
             )}
           </div>
-          <span className={`text-[11px] font-medium transition-colors ${isActive('/cart') ? 'text-ocean-950' : 'text-slate-400/80'}`}>
+          <span className={`text-[11px] font-medium transition-colors ${isActive('/cart') ? 'text-[#C4A67C]' : 'text-slate-400/80'}`}>
             Carrinho
           </span>
         </Link>

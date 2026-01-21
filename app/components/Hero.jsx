@@ -36,7 +36,7 @@ export default function Hero() {
           Mergulhe na elegância
         </p>
         <p className="max-w-md text-sm md:text-base font-light mb-8 text-white/90 animate-fade-in drop-shadow-md leading-relaxed">
-          Peças sustentavéis e inspiradas no Oceano.
+          Peças sustentavéis inspiradas no Oceano.
         </p>
         <button 
           onClick={() => {
