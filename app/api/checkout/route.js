@@ -1,23 +1,27 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// Inicializar o Stripe com a chave secreta
+// Inicializar o Stripe com a chave secreta definida no .env.local
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request) {
   try {
-    // 1. Receber o carrinho do Frontend
+    // 1. Receber o carrinho enviado pelo Checkout (Frontend)
     const { cart } = await request.json();
 
-    // 2. Transformar o carrinho no formato que o Stripe exige
+    if (!cart || cart.length === 0) {
+      return NextResponse.json({ error: 'Carrinho vazio' }, { status: 400 });
+    }
+
+    // 2. Transformar o carrinho no formato que o Stripe exige (Line Items)
     const lineItems = cart.map((item) => ({
       price_data: {
         currency: 'eur',
         product_data: {
           name: item.name,
-          images: [item.image_url], // O Stripe mostra a imagem no checkout
+          images: [item.image_url], // A imagem aparece na página do Stripe
         },
-        unit_amount: Math.round(item.price * 100), // O Stripe trabalha em cêntimos (10.00€ = 1000)
+        unit_amount: Math.round(item.price * 100), // O Stripe trabalha em cêntimos (Ex: 10.00€ = 1000)
       },
       quantity: item.quantity,
     }));
@@ -27,8 +31,9 @@ export async function POST(request) {
       payment_method_types: ['card'], // Aceitar cartões
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${request.headers.get('origin')}/success`, // Para onde vai se pagar?
-      cancel_url: `${request.headers.get('origin')}/cart`,   // Para onde vai se cancelar?
+      // URLs de retorno para a aplicação
+      success_url: `${request.headers.get('origin')}/success`, // Página de Sucesso (onde gravamos a encomenda)
+      cancel_url: `${request.headers.get('origin')}/checkout`, // Se cancelar, volta ao checkout
     });
 
     // 4. Enviar o link de pagamento de volta para o Frontend
@@ -36,6 +41,6 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Erro no checkout:', error);
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+    return NextResponse.json({ error: 'Erro interno ao criar sessão de pagamento' }, { status: 500 });
   }
 }
