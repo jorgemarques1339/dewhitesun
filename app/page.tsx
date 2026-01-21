@@ -11,7 +11,8 @@ import Hero from './components/Hero';
 import Values from './components/Values';
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
+  // CORREÇÃO: Adicionado <any[]> para evitar o erro "Type 'any[]' is not assignable to type 'never[]'"
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const carouselRef = useRef(null); // Referência para o carrossel
 
@@ -22,6 +23,7 @@ export default function Home() {
       if (error) {
         console.error('Erro ao buscar produtos:', error);
       } else {
+        // O "|| []" garante que não passamos null
         setProducts(data || []);
       }
       setLoading(false);
