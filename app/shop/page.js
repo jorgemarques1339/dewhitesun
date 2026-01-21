@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { ShoppingBag, Heart, Loader2, Search, Filter, X } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
 import { useCart } from '@/app/context/CartContext';
-import toast from 'react-hot-toast'; // <--- Importar Toasts
+import { useWishlist } from '@/app/context/WishlistContext'; // <--- 1. Importar Contexto Wishlist
+import toast from 'react-hot-toast';
 
 export default function ShopPage() {
   const [products, setProducts] = useState([]);
@@ -18,6 +19,7 @@ export default function ShopPage() {
   const [categories, setCategories] = useState(['Todos']);
 
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist(); // <--- 2. Usar Hooks da Wishlist
 
   useEffect(() => {
     async function fetchProducts() {
@@ -82,45 +84,56 @@ export default function ShopPage() {
               <div className="text-center py-20 text-slate-400"><p>Nenhum produto encontrado para a sua pesquisa.</p><button onClick={() => { setSearchQuery(''); setSelectedCategory('Todos'); }} className="mt-4 text-brand font-bold hover:underline">Limpar Filtros</button></div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => (
-                  <Link key={product.id} href={`/product/${product.id}`} className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-100 group block hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden">
-                      <img src={product.image_url} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                      <button 
-                        onClick={(e) => { 
-                          e.preventDefault(); 
-                          toast.success('Adicionado aos favoritos!'); 
-                        }} 
-                        className="absolute top-2 right-2 p-2 bg-white/70 backdrop-blur-md rounded-full text-ocean-900 hover:bg-white hover:text-red-500 shadow-sm transition-all z-10"
-                      >
-                        <Heart size={16} />
-                      </button>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-serif text-sm md:text-base text-ocean-950 truncate mb-1 group-hover:text-gold-600 transition-colors">{product.name}</h3>
-                      <p className="text-[10px] md:text-xs text-slate-400 uppercase tracking-wide mb-3">{product.category || 'Coleção'}</p>
-                      <div className="flex justify-between items-center border-t border-slate-50 pt-3">
-                        <p className="text-ocean-950 font-medium">€{product.price}</p>
+                {filteredProducts.map((product) => {
+                  // 3. Verificar se é favorito para decidir o estilo do botão
+                  const isFav = isInWishlist(product.id);
+                  
+                  return (
+                    <Link key={product.id} href={`/product/${product.id}`} className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-100 group block hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                      <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden">
+                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        
+                        {/* BOTÃO FAVORITOS ATUALIZADO */}
                         <button 
-                          onClick={(e) => {
+                          onClick={(e) => { 
                             e.preventDefault(); 
-                            addToCart(product);
-                            // Notificação personalizada igual à página de detalhes
-                            toast.success((t) => (
-                              <span className="flex flex-col">
-                                <span className="font-bold">Adicionado ao carrinho</span>
-                                <span className="text-xs text-slate-500">{product.name}</span>
-                              </span>
-                            ));
-                          }}
-                          className="p-2 bg-ocean-50 text-ocean-900 rounded-full group-hover:bg-ocean-950 group-hover:text-white transition-colors duration-300"
+                            toggleWishlist(product); // Adicionar/Remover da BD
+                          }} 
+                          className={`absolute top-2 right-2 p-2 rounded-full shadow-sm transition-all z-10 
+                            ${isFav 
+                              ? 'bg-[#C4A67C] text-white hover:bg-[#a58d56]' // Se for favorito: Fundo dourado
+                              : 'bg-white/70 backdrop-blur-md text-ocean-900 hover:bg-white hover:text-red-500' // Senão: Branco normal
+                            }`}
                         >
-                          <ShoppingBag size={16} />
+                          <Heart size={16} fill={isFav ? "currentColor" : "none"} />
                         </button>
+
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="p-4">
+                        <h3 className="font-serif text-sm md:text-base text-ocean-950 truncate mb-1 group-hover:text-gold-600 transition-colors">{product.name}</h3>
+                        <p className="text-[10px] md:text-xs text-slate-400 uppercase tracking-wide mb-3">{product.category || 'Coleção'}</p>
+                        <div className="flex justify-between items-center border-t border-slate-50 pt-3">
+                          <p className="text-ocean-950 font-medium">€{product.price}</p>
+                          <button 
+                            onClick={(e) => {
+                              e.preventDefault(); 
+                              addToCart(product);
+                              toast.success((t) => (
+                                <span className="flex flex-col">
+                                  <span className="font-bold">Adicionado ao carrinho</span>
+                                  <span className="text-xs text-slate-500">{product.name}</span>
+                                </span>
+                              ));
+                            }}
+                            className="p-2 bg-ocean-50 text-ocean-900 rounded-full group-hover:bg-ocean-950 group-hover:text-white transition-colors duration-300"
+                          >
+                            <ShoppingBag size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </>
