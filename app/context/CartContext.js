@@ -32,9 +32,8 @@ export function CartProvider({ children }) {
     });
   };
 
-  // --- NOVA FUNÇÃO: Atualizar Quantidade ---
   const updateQuantity = (id, newQuantity) => {
-    if (newQuantity < 1) return; // Não deixar baixar de 1
+    if (newQuantity < 1) return;
     setCart((prev) => 
       prev.map((item) => item.id === id ? { ...item, quantity: newQuantity } : item)
     );
@@ -44,13 +43,17 @@ export function CartProvider({ children }) {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
+  // --- NOVA FUNÇÃO ---
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem('dws_cart');
+  };
+
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
-  
-  // Calcular o total em Euros
   const cartTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, cartCount, cartTotal }}>
+    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, clearCart, cartCount, cartTotal }}>
       {children}
     </CartContext.Provider>
   );
