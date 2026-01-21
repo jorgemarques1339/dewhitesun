@@ -11,10 +11,12 @@ import Hero from './components/Hero';
 import Values from './components/Values';
 
 export default function Home() {
-  // CORREÇÃO: Adicionado <any[]> para evitar o erro "Type 'any[]' is not assignable to type 'never[]'"
+  // CORREÇÃO: Adicionado <any[]> para evitar erro de tipo nos produtos
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const carouselRef = useRef(null); // Referência para o carrossel
+  
+  // CORREÇÃO: Adicionado <HTMLDivElement> para evitar erro "Property does not exist on type 'never'"
+  const carouselRef = useRef<HTMLDivElement>(null); 
 
   useEffect(() => {
     async function fetchProducts() {
@@ -37,7 +39,8 @@ export default function Home() {
     const interval = setInterval(() => {
       if (carouselRef.current) {
         const container = carouselRef.current;
-        const card = container.firstElementChild;
+        // CORREÇÃO: Forçar o tipo HTMLElement para aceder ao offsetWidth sem erro
+        const card = container.firstElementChild as HTMLElement;
         const cardWidth = card ? card.offsetWidth : 0;
         const gap = 24; // gap-6 do tailwind equivale a 24px
         
