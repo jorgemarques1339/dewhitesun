@@ -23,7 +23,7 @@ export default function Values() {
 
   return (
     // Fundo Bege Claro (#F9F8F6) para o ar luxuoso e clean
-    <section className="bg-[#F9F8F6] py-24 relative overflow-hidden">
+    <section className="bg-[#F9F8F6] py-10 relative overflow-hidden">
       
       {/* Elemento decorativo de fundo (círculo subtil) */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-white rounded-full blur-3xl opacity-40 pointer-events-none"></div>
@@ -32,7 +32,7 @@ export default function Values() {
         
         {/* Cabeçalho da Secção */}
         <div className="text-center mb-16">
-          <h2 className="text-[17px] font-bold tracking-[0.3em] text-[#C4A67C] uppercase">
+          <h2 className="text-[20px] font-bold tracking-[0.3em] text-[#C4A67C] uppercase">
             OS NOSSOS VALORES
           </h2>
         </div>

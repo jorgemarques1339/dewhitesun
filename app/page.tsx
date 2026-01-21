@@ -90,11 +90,8 @@ export default function Home() {
 
         {/* Cabeçalho da Secção */}
         <div className="text-center mb-10">
-          <span className="text-[#C4A67C] uppercase tracking-[0.2em] text-xs font-bold">
-            Seleção do Mês
-          </span>
           <h2 className="font-serif text-3xl md:text-5xl text-ocean-950 mt-3 mb-6">
-            Destaques da Coleção
+            Novos Lançamentos
           </h2>
           <div className="w-24 h-1 bg-[#C4A67C] mx-auto rounded-full opacity-60"></div>
         </div>
