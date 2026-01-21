@@ -3,20 +3,21 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { ArrowRight } from 'lucide-react'; // Ícones limpos
+import { ArrowRight } from 'lucide-react';
 
 // Importar os Componentes
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Values from './components/Values';
 import Skeleton from './components/Skeleton';
+import Footer from './components/Footer';
 
 export default function Home() {
-  // 1. CORREÇÃO: Tipagem para evitar erro "never[]"
+  // CORREÇÃO 1: Adicionado <any[]> para o TypeScript aceitar a lista de produtos
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // 2. CORREÇÃO: Tipagem do Ref para o carrossel funcionar
+  // CORREÇÃO 2: Adicionado <HTMLDivElement> para o useRef saber que é uma div
   const carouselRef = useRef<HTMLDivElement>(null); 
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function Home() {
     const interval = setInterval(() => {
       if (carouselRef.current) {
         const container = carouselRef.current;
-        // 3. CORREÇÃO: Casting para HTMLElement para aceder ao offsetWidth
+        // CORREÇÃO 3: 'as HTMLElement' para garantir que o TypeScript sabe que tem offsetWidth
         const card = container.firstElementChild as HTMLElement;
         
         if (card) {
@@ -89,8 +90,11 @@ export default function Home() {
 
         {/* Cabeçalho da Secção */}
         <div className="text-center mb-10">
+          <span className="text-[#C4A67C] uppercase tracking-[0.2em] text-xs font-bold">
+            Seleção do Mês
+          </span>
           <h2 className="font-serif text-3xl md:text-5xl text-ocean-950 mt-3 mb-6">
-            Novos Lançamentos
+            Destaques da Coleção
           </h2>
           <div className="w-24 h-1 bg-[#C4A67C] mx-auto rounded-full opacity-60"></div>
         </div>
@@ -121,7 +125,7 @@ export default function Home() {
         ) : (
           <div className="relative">
             
-            {/* CARROSSEL DE PRODUTOS REAL (Sem botão de favoritos) */}
+            {/* CARROSSEL DE PRODUTOS REAL */}
             <div 
               ref={carouselRef}
               className="flex overflow-x-auto gap-6 pb-12 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
@@ -170,9 +174,9 @@ export default function Home() {
             <div className="text-center mt-4">
               <Link 
                 href="/shop" 
-                className="inline-block bg-ocean-950 text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-[#C4A67C] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-transparent border border-ocean-950 text-ocean-950 rounded-full hover:bg-ocean-950 hover:text-white transition-all duration-300 uppercase tracking-widest text-xs font-bold"
               >
-                Ver Toda a Coleção
+                Ver Toda a Coleção <ArrowRight size={16} />
               </Link>
             </div>
 
@@ -196,6 +200,9 @@ export default function Home() {
             <p className="font-serif text-2xl text-ocean-950 italic mb-4 leading-relaxed">
               "Criamos para a mulher que carrega o verão na alma, independentemente da estação do ano."
             </p>
+            <p className="text-xs font-bold tracking-widest text-[#C4A67C] uppercase">
+              — Manifesto DeWhiteSun
+            </p>
           </div>
 
           <p className="text-slate-600 font-light leading-relaxed mb-8 max-w-2xl mx-auto">
@@ -211,6 +218,9 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* 5. Footer (Adicionado no final) */}
+      <Footer />
 
     </main>
   );

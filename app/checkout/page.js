@@ -1,6 +1,5 @@
 'use client';
 
-// 1. A IMPORTAÇÃO FUNDAMENTAL QUE FALTAVA
 import { useState, useEffect } from 'react';
 import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
@@ -32,7 +31,7 @@ export default function CheckoutPage() {
     }
   }, [profile]);
 
-  // Função Final: Chamar Stripe
+  // Função Final: Chamar Stripe com Validação de Stock
   const handlePayment = async () => {
     setLoadingPayment(true);
     
@@ -45,20 +44,27 @@ export default function CheckoutPage() {
       
       const data = await response.json();
       
+      // MUDANÇA AQUI: Verificar se a resposta não foi bem sucedida (ex: stock insuficiente)
+      if (!response.ok) {
+        // Mostra a mensagem de erro específica que veio do servidor
+        toast.error(data.error || "Erro ao processar pagamento.");
+        setLoadingPayment(false);
+        return;
+      }
+      
+      // Se tudo correu bem, redirecionar para o Stripe
       if (data.url) {
         window.location.href = data.url;
-      } else {
-        toast.error("Erro ao iniciar pagamento.");
-        setLoadingPayment(false);
       }
+      
     } catch (error) {
       console.error(error);
-      toast.error("Erro de conexão.");
+      toast.error("Erro de conexão. Verifique a internet.");
       setLoadingPayment(false);
     }
   };
 
-  // Se o carrinho estiver vazio e não estiver a carregar, manda de volta
+  // Se o carrinho estiver vazio e não estiver a carregar
   if (!loading && cart.length === 0) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
@@ -79,7 +85,7 @@ export default function CheckoutPage() {
 
       <div className="pt-32 px-4 max-w-2xl mx-auto">
         
-        {/* Cabeçalho com Link de Voltar */}
+        {/* Cabeçalho */}
         <div className="flex items-center gap-4 mb-8">
           <Link href="/cart" className="p-2 bg-white rounded-full hover:bg-slate-100 transition-colors">
             <ArrowLeft size={20} className="text-slate-400" />
@@ -100,7 +106,7 @@ export default function CheckoutPage() {
             ))}
         </div>
 
-        {/* CONTEÚDO DOS PASSOS */}
+        {/* CONTEÚDO */}
         <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
           
           {/* PASSO 1: RESUMO */}

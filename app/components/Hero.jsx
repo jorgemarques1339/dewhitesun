@@ -22,21 +22,14 @@ export default function Hero() {
 
       {/* Conteúdo de Texto */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 text-white mt-4">
-        
-        <span className="uppercase tracking-[0.4em] text-xs md:text-sm mb-4 animate-fade-in font-medium text-gold-400 drop-shadow-md">
-          Edição Limitada
-        </span>
-        
+
         <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl mb-6 animate-slide-down drop-shadow-lg">
           Nova Coleção <br />
           <span className="italic font-light">2026</span>
         </h1>
-        
+  
         <p className="max-w-md text-sm md:text-base font-light mb-8 text-white/90 animate-fade-in drop-shadow-md leading-relaxed">
-          Mergulhe na elegância
-        </p>
-        <p className="max-w-md text-sm md:text-base font-light mb-8 text-white/90 animate-fade-in drop-shadow-md leading-relaxed">
-          Peças sustentavéis inspiradas no Oceano.
+          Peças sustentavéis inspiradas no Oceano
         </p>
         <button 
           onClick={() => {
