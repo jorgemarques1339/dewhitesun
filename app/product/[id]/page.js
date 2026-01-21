@@ -1,23 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase'; // A tua ligação à Base de Dados
-import { useCart } from '@/app/context/CartContext'; // <--- O nosso Contexto do Carrinho
+import { supabase } from '@/lib/supabase';
+import { useCart } from '@/app/context/CartContext';
 import { ArrowLeft, ShoppingBag, Star, Share2, Heart, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import toast from 'react-hot-toast'; // <--- 1. Importar toast
 
 export default function ProductPage() {
-  const { id } = useParams(); // Ler o ID do URL
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // Buscar a função addToCart ao nosso "Cérebro" (Contexto)
   const { addToCart } = useCart(); 
 
   useEffect(() => {
     async function fetchProduct() {
-      // Pedir ao Supabase o produto específico
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -26,6 +25,7 @@ export default function ProductPage() {
 
       if (error) {
         console.error('Erro ao buscar produto:', error);
+        toast.error('Erro ao carregar o produto.'); // Exemplo de erro
       } else {
         setProduct(data);
       }
@@ -54,20 +54,20 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen bg-white pb-24 animate-fade-in">
-      {/* Barra Superior Flutuante (Botão Voltar) */}
+      {/* Barra Superior */}
       <div className="absolute top-0 left-0 p-4 z-20 w-full flex justify-between items-center">
         <Link href="/" className="bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg shadow-ocean-900/5 hover:scale-105 transition-all">
           <ArrowLeft size={24} className="text-ocean-950" />
         </Link>
         <button 
-          onClick={() => alert('Adicionado aos favoritos (Demo)')}
+          onClick={() => toast.success('Adicionado aos favoritos!')} // <--- Toast nos favoritos
           className="bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg shadow-ocean-900/5 hover:scale-105 transition-all"
         >
           <Heart size={24} className="text-ocean-950 hover:text-red-500 hover:fill-red-500 transition-colors" />
         </button>
       </div>
 
-      {/* Imagem do Produto */}
+      {/* Imagem */}
       <div className="h-[50vh] w-full bg-slate-100 relative">
         <img 
           src={product.image_url} 
@@ -77,13 +77,11 @@ export default function ProductPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
       </div>
 
-      {/* Card de Detalhes (Sobrepõe a imagem) */}
+      {/* Detalhes */}
       <div className="px-8 py-8 -mt-8 relative bg-white rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col items-center text-center min-h-[50vh]">
-        
-        {/* Marcador Visual */}
         <div className="w-12 h-1 bg-slate-200 rounded-full mb-6"></div>
 
-        {/* Categoria e Avaliação */}
+        {/* Categoria e Rating */}
         <div className="flex flex-col items-center mb-4 gap-2">
           <span className="inline-block px-3 py-1 bg-ocean-50 text-ocean-800 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full border border-ocean-100">
             {product.category || 'Exclusivo'}
@@ -96,12 +94,18 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* Título e Partilhar */}
+        {/* Título */}
         <div className="flex items-center justify-center gap-3 mb-6 w-full relative">
           <h1 className="font-serif text-2xl md:text-3xl text-ocean-950 leading-tight">
             {product.name}
           </h1>
-          <button className="absolute right-0 p-2 text-ocean-900/50 hover:text-ocean-900 transition-colors">
+          <button 
+            onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success('Link copiado!');
+            }}
+            className="absolute right-0 p-2 text-ocean-900/50 hover:text-ocean-900 transition-colors"
+          >
             <Share2 size={22} />
           </button>
         </div>
@@ -114,7 +118,7 @@ export default function ProductPage() {
           </p>
         </div>
 
-        {/* Rodapé Fixo: Preço e Botão Adicionar */}
+        {/* Rodapé Fixo */}
         <div className="w-full flex flex-col items-center pt-6 border-t border-slate-100 gap-4 mt-auto">
           <div className="flex flex-col items-center">
             <p className="text-slate-400 text-[10px] uppercase tracking-wider mb-1">Preço</p>
@@ -123,8 +127,14 @@ export default function ProductPage() {
           
           <button 
             onClick={() => {
-              addToCart(product); // <--- AQUI ESTÁ A FUNÇÃO
-              alert('Produto adicionado ao carrinho com sucesso!');
+              addToCart(product);
+              // 2. USAR TOAST AQUI - Notificação personalizada
+              toast.success((t) => (
+                <span className="flex flex-col">
+                  <span className="font-bold">Adicionado ao carrinho</span>
+                  <span className="text-xs text-slate-500">{product.name}</span>
+                </span>
+              ));
             }}
             className="w-full max-w-xs py-4 rounded-full flex items-center justify-center space-x-2 bg-ocean-950 hover:bg-ocean-800 shadow-xl shadow-ocean-900/20 active:scale-95 transition-all text-white"
           >

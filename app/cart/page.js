@@ -18,7 +18,8 @@ export default function CartPage() {
         {cart.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-slate-400 mb-6">O carrinho está vazio.</p>
-            <Link href="/" className="text-brand font-bold uppercase tracking-widest text-sm hover:underline">
+            {/* MUDANÇA: href="/" alterado para href="/shop" */}
+            <Link href="/shop" className="text-brand font-bold uppercase tracking-widest text-sm hover:underline">
               Explorar Coleção
             </Link>
           </div>
@@ -76,7 +77,6 @@ export default function CartPage() {
                 <span className="font-serif text-3xl text-ocean-950">€{cartTotal.toFixed(2)}</span>
               </div>
               
-              {/* LINK ATUALIZADO: Vai para a página de Checkout de 3 passos */}
               <Link 
                 href="/checkout"
                 className="w-full bg-ocean-950 text-white py-4 rounded-xl font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-ocean-800 transition-all shadow-xl shadow-ocean-900/20 active:scale-95"
