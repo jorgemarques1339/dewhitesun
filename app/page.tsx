@@ -1,21 +1,22 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react'; // Adicionado useRef
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { ShoppingBag, Heart, Loader2, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react'; // Ícones limpos
 
 // Importar os Componentes
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Values from './components/Values';
+import Skeleton from './components/Skeleton';
 
 export default function Home() {
-  // CORREÇÃO: Adicionado <any[]> para evitar erro de tipo nos produtos
+  // 1. CORREÇÃO: Tipagem para evitar erro "never[]"
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // CORREÇÃO: Adicionado <HTMLDivElement> para evitar erro "Property does not exist on type 'never'"
+  // 2. CORREÇÃO: Tipagem do Ref para o carrossel funcionar
   const carouselRef = useRef<HTMLDivElement>(null); 
 
   useEffect(() => {
@@ -25,7 +26,6 @@ export default function Home() {
       if (error) {
         console.error('Erro ao buscar produtos:', error);
       } else {
-        // O "|| []" garante que não passamos null
         setProducts(data || []);
       }
       setLoading(false);
@@ -36,31 +36,32 @@ export default function Home() {
 
   // Lógica de Movimento Automático (Auto-Scroll)
   useEffect(() => {
+    if (loading) return;
+
     const interval = setInterval(() => {
       if (carouselRef.current) {
         const container = carouselRef.current;
-        // CORREÇÃO: Forçar o tipo HTMLElement para aceder ao offsetWidth sem erro
+        // 3. CORREÇÃO: Casting para HTMLElement para aceder ao offsetWidth
         const card = container.firstElementChild as HTMLElement;
-        const cardWidth = card ? card.offsetWidth : 0;
-        const gap = 24; // gap-6 do tailwind equivale a 24px
         
-        // Verifica se chegou ao fim (com uma margem de erro pequena)
-        const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 10;
+        if (card) {
+          const cardWidth = card.offsetWidth;
+          const gap = 24; 
+          
+          const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 10;
 
-        if (isAtEnd) {
-          // Se chegou ao fim, volta ao início suavemente
-          container.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          // Senão, desliza um cartão para a direita
-          container.scrollBy({ left: cardWidth + gap, behavior: 'smooth' });
+          if (isAtEnd) {
+            container.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            container.scrollBy({ left: cardWidth + gap, behavior: 'smooth' });
+          }
         }
       }
-    }, 3000); // 3 segundos
+    }, 3000);
 
-    return () => clearInterval(interval); // Limpa o timer ao sair da página
-  }, [loading]); // Recomeça quando o loading termina
+    return () => clearInterval(interval);
+  }, [loading]);
 
-  // SELEÇÃO EXCLUSIVA: Apenas os primeiros 4 produtos
   const featuredProducts = products.slice(0, 4);
 
   return (
@@ -74,10 +75,8 @@ export default function Home() {
       <Values />
 
       {/* 3. Destaques (Carrossel Horizontal) */}
-      {/* MUDANÇA: Reduzido py-24 para py-12 para diminuir o espaço */}
       <div id="collection" className="py-12 px-4 max-w-7xl mx-auto overflow-hidden">
         
-        {/* CSS para esconder a barra de scroll e manter a elegância */}
         <style jsx>{`
           .scrollbar-hide::-webkit-scrollbar {
               display: none;
@@ -97,22 +96,40 @@ export default function Home() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-40">
-            <Loader2 className="animate-spin text-[#C4A67C]" size={32} />
+          // --- SKELETON LOADING STATE ---
+          <div className="flex overflow-x-auto gap-6 pb-12 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+            {[1, 2, 3, 4].map((i) => (
+              <div 
+                key={i} 
+                className="min-w-[65%] md:min-w-[350px] bg-white rounded-2xl overflow-hidden border border-slate-50 shadow-sm"
+              >
+                <div className="aspect-[3/4] w-full bg-slate-100 animate-pulse relative">
+                   <div className="absolute top-4 right-4 bg-white/50 w-10 h-10 rounded-full"></div>
+                </div>
+                
+                <div className="p-6 space-y-4">
+                  <Skeleton className="h-3 w-1/3" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <div className="pt-4 flex justify-between items-center border-t border-slate-50 mt-4">
+                    <Skeleton className="h-6 w-1/4" />
+                    <Skeleton className="h-4 w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="relative">
             
-            {/* CARROSSEL DE PRODUTOS */}
+            {/* CARROSSEL DE PRODUTOS REAL (Sem botão de favoritos) */}
             <div 
-              ref={carouselRef} // Ligar a referência aqui
+              ref={carouselRef}
               className="flex overflow-x-auto gap-6 pb-12 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
             >
               {featuredProducts.map((product) => (
                 <Link 
                   key={product.id} 
                   href={`/product/${product.id}`}
-                  // MUDANÇA AQUI: Reduzi de min-w-[85%] para min-w-[65%] em mobile
                   className="min-w-[65%] md:min-w-[350px] snap-center bg-white rounded-2xl overflow-hidden shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-15px_rgba(196,166,124,0.15)] transition-all duration-500 group flex flex-col border border-slate-50"
                 >
                   {/* Imagem */}
@@ -122,20 +139,7 @@ export default function Home() {
                       alt={product.name} 
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                     />
-                    
-                    {/* Overlay suave ao passar o rato */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
-
-                    {/* Botão de Favoritos (Aparece no Hover em Desktop) */}
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        alert('Adicionado aos favoritos!');
-                      }}
-                      className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur-md rounded-full text-[#C4A67C] opacity-100 md:opacity-0 md:group-hover:opacity-100 transform md:translate-y-2 md:group-hover:translate-y-0 transition-all duration-300 hover:bg-[#C4A67C] hover:text-white shadow-sm"
-                    >
-                      <Heart size={20} strokeWidth={2} />
-                    </button>
                   </div>
 
                   {/* Informação */}
@@ -176,8 +180,7 @@ export default function Home() {
         )}
       </div>
       
-      {/* 4. Secção Sobre Nós / Manifesto (NOVA) */}
-      {/* MUDANÇA: Reduzido py-24 para py-12 */}
+      {/* 4. Secção Sobre Nós / Manifesto */}
       <section className="py-12 px-4 bg-[#F9F8F6]">
         <div className="max-w-4xl mx-auto text-center">
           
@@ -188,7 +191,6 @@ export default function Home() {
             Sobre a DeWhiteSun
           </h2>
 
-          {/* Manifesto Card (Layout Luxuoso Igual à página Sobre) */}
           <div className="p-10 bg-white rounded-3xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] border border-[#EBE8E0] relative overflow-hidden mb-10">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#C4A67C] to-transparent"></div>
             <p className="font-serif text-2xl text-ocean-950 italic mb-4 leading-relaxed">

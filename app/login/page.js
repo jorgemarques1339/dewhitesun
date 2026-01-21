@@ -6,23 +6,47 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { supabase } from '@/lib/supabase'; // <--- Importar Supabase
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState(''); // Novo estado para confirmação
+  const [confirmPassword, setConfirmPassword] = useState(''); 
   const [isSignUp, setIsSignUp] = useState(false);
   const { signIn, signUp } = useAuth();
   const router = useRouter();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // --- NOVA FUNÇÃO: Recuperar Password ---
+  const handleResetPassword = async () => {
+    if (!email) {
+      toast.error('Por favor, preencha o seu email primeiro.');
+      return;
+    }
+
+    const toastId = toast.loading('A enviar email de recuperação...');
+
+    try {
+      // Envia o email de reset. O utilizador será redirecionado para o perfil para mudar a senha.
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/profile`, 
+      });
+
+      if (error) throw error;
+
+      toast.success('Email enviado! Verifique a sua caixa de entrada.', { id: toastId });
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao enviar email: ' + err.message, { id: toastId });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Validação de Password no Registo
     if (isSignUp && password !== confirmPassword) {
       setError('As palavras-passe não coincidem.');
       toast.error('As palavras-passe não coincidem.');
@@ -32,10 +56,9 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        // 1. Criar conta no Supabase
         await signUp(email, password);
 
-        // 2. Tentar Enviar Email de Boas-vindas
+        // Tentar Enviar Email de Boas-vindas
         try {
           const emailResponse = await fetch('/api/email', {
             method: 'POST',
@@ -61,10 +84,7 @@ export default function LoginPage() {
             })
           });
           
-          if (!emailResponse.ok) {
-            console.warn("Aviso: Conta criada, mas falha ao enviar email.", emailResponse.status);
-          }
-
+          if (!emailResponse.ok) console.warn("Aviso: Falha ao enviar email.", emailResponse.status);
         } catch (emailErr) {
           console.error("Erro não fatal no envio de email:", emailErr);
         }
@@ -72,7 +92,6 @@ export default function LoginPage() {
         toast.success('Conta criada com sucesso! Verifique o seu email.');
         
       } else {
-        // Login Normal
         await signIn(email, password);
         toast.success('Bem-vindo de volta!');
         router.push('/profile');
@@ -91,7 +110,6 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 pb-24">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100 relative overflow-hidden">
         
-        {/* LOGÓTIPO EM DESTAQUE */}
         <div className="flex justify-center mb-6">
           <img 
             src="https://i.ibb.co/TzyqgkH/Gemini-Generated-Image-2xxali2xxali2xxa-removebg-preview.png" 
@@ -127,9 +145,21 @@ export default function LoginPage() {
               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-ocean-950 transition-colors"
               required 
             />
+            
+            {/* BOTÃO DE RECUPERAÇÃO DE PASSWORD (Apenas no Login) */}
+            {!isSignUp && (
+              <div className="flex justify-end mt-2">
+                <button 
+                  type="button"
+                  onClick={handleResetPassword}
+                  className="text-xs text-slate-400 hover:text-[#C4A67C] transition-colors"
+                >
+                  Esqueceu-se da palavra-passe?
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Campo de Confirmação de Password (Apenas no Registo) */}
           {isSignUp && (
             <div className="animate-fade-in">
               <input 
@@ -163,7 +193,7 @@ export default function LoginPage() {
             onClick={() => { 
               setIsSignUp(!isSignUp); 
               setError(null); 
-              setConfirmPassword(''); // Limpar campo ao trocar
+              setConfirmPassword('');
             }}
             className="text-sm text-slate-500 hover:text-ocean-950 transition-colors"
           >
