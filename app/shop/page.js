@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image'; // <--- 1. Importar Image
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { ShoppingBag, Heart, Loader2, Search, Filter, X, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
@@ -164,8 +164,8 @@ export default function ShopPage() {
           </div>
 
           {/* Filtro de Preço (Expandível) */}
-          {(showFilters || window.innerWidth > 768) && (
-             <div className={`mt-4 pt-4 border-t border-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in ${showFilters ? 'block' : 'hidden md:grid'}`}>
+          {/* CORREÇÃO: Removida a condição '|| window.innerWidth' que causava erro no build */}
+          <div className={`mt-4 pt-4 border-t border-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in ${showFilters ? 'block' : 'hidden md:grid'}`}>
                <div className="flex items-center gap-4">
                   <span className="text-xs font-bold text-slate-400 uppercase">Preço:</span>
                   <div className="flex items-center gap-2">
@@ -193,11 +193,11 @@ export default function ShopPage() {
                     A mostrar <span className="font-bold text-ocean-950">{filteredProducts.length}</span> produtos
                   </p>
                </div>
-             </div>
-          )}
+          </div>
+
         </div>
 
-        {/* Grid de Produtos */}
+        {/* Loading ou Grid de Produtos */}
         {loading ? (
           <div className="flex justify-center items-center h-60"><Loader2 className="animate-spin text-[#C4A67C]" size={40} /></div>
         ) : (
@@ -230,7 +230,7 @@ export default function ShopPage() {
                       className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-100 group block hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${isOutOfStock ? 'opacity-75' : ''}`}
                     >
                       <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden">
-                        {/* 2. Substituição por next/image para performance */}
+                        {/* Imagem com next/image para otimização */}
                         <Image 
                           src={product.image_url} 
                           alt={product.name}
