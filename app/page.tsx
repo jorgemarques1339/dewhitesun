@@ -94,7 +94,7 @@ export default function Home() {
             Seleção do Mês
           </span>
           <h2 className="font-serif text-3xl md:text-5xl text-ocean-950 mt-3 mb-6">
-            Destaques da Coleção
+            Novos Lançamentos
           </h2>
           <div className="w-24 h-1 bg-[#C4A67C] mx-auto rounded-full opacity-60"></div>
         </div>
@@ -174,9 +174,9 @@ export default function Home() {
             <div className="text-center mt-4">
               <Link 
                 href="/shop" 
-                className="inline-flex items-center gap-3 px-8 py-4 bg-transparent border border-ocean-950 text-ocean-950 rounded-full hover:bg-ocean-950 hover:text-white transition-all duration-300 uppercase tracking-widest text-xs font-bold"
+                className="inline-block bg-ocean-950 text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-[#C4A67C] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
               >
-                Ver Toda a Coleção <ArrowRight size={16} />
+                Ver Toda a Coleção
               </Link>
             </div>
 
