@@ -23,7 +23,7 @@ export default function AdminPage() {
   
   // Dados
   const [stats, setStats] = useState({ revenue: 0, orders: 0, customers: 0 });
-  const [chartData, setChartData] = useState([]); // <--- Dados para o Gráfico
+  const [chartData, setChartData] = useState([]);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -35,11 +35,19 @@ export default function AdminPage() {
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Formulário
+  // Formulário (ATUALIZADO COM NOVOS CAMPOS)
   const [formData, setFormData] = useState({
     id: null,
-    name: '', category: '', price: '', stock: 0, description: '', image_url: ''
+    name: '', 
+    category: '', 
+    price: '', 
+    stock: 0, 
+    description: '', 
+    image_url: '',
+    materials: '', // Novo campo
+    shipping_info: '' // Novo campo
   });
+  
   const [uploading, setUploading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -66,26 +74,20 @@ export default function AdminPage() {
     const { data: prodData } = await supabase.from('products').select('*').order('id', { ascending: false });
     if (prodData) setProducts(prodData);
 
-    // Buscar TODAS as encomendas para estatísticas e gráfico
     const { data: allOrders } = await supabase.from('orders').select('id, total, user_id, created_at').order('created_at', { ascending: false });
     
     if (allOrders) {
-      // Estatísticas
       const totalRev = allOrders.reduce((acc, order) => acc + (order.total || 0), 0);
       const uniqueCustomers = new Set(allOrders.map(o => o.user_id)).size;
       setStats({ revenue: totalRev, orders: allOrders.length, customers: uniqueCustomers });
 
-      // --- PROCESSAR DADOS PARA O GRÁFICO ---
-      // Agrupar vendas por dia
+      // Gráfico
       const chartMap = new Map();
-      
       allOrders.forEach(order => {
         const date = new Date(order.created_at).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
         const currentTotal = chartMap.get(date) || 0;
         chartMap.set(date, currentTotal + (order.total || 0));
       });
-
-      // Converter para array e inverter (para ficar cronológico: Esquerda -> Direita)
       const graphData = Array.from(chartMap, ([name, vendas]) => ({ name, vendas })).reverse();
       setChartData(graphData);
     }
@@ -149,14 +151,21 @@ export default function AdminPage() {
 
   // --- AÇÕES ---
   const openCreateModal = () => {
-    setFormData({ id: null, name: '', category: '', price: '', stock: 0, description: '', image_url: '' });
+    setFormData({ 
+      id: null, name: '', category: '', price: '', stock: 0, description: '', image_url: '',
+      materials: '', shipping_info: '' 
+    });
     setImageFile(null);
     setPreviewUrl('');
     setShowModal(true);
   };
 
   const openEditModal = (product) => {
-    setFormData(product);
+    setFormData({
+      ...product,
+      materials: product.materials || '', // Garantir que não é null
+      shipping_info: product.shipping_info || ''
+    });
     setImageFile(null);
     setPreviewUrl(product.image_url);
     setShowModal(true);
@@ -227,6 +236,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans relative">
       {isMobileMenuOpen && (<div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setIsMobileMenuOpen(false)}></div>)}
+      
       <aside className={`w-64 bg-ocean-950 text-white flex flex-col fixed h-full z-30 shadow-xl transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="p-8 border-b border-white/10 flex justify-between items-center">
           <div><h1 className="font-serif text-2xl tracking-wide text-gold-400">DeWhiteSun</h1><span className="text-[10px] text-slate-400 uppercase tracking-[0.2em]">Backoffice</span></div>
@@ -252,35 +262,22 @@ export default function AdminPage() {
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4"><div className="p-4 bg-blue-50 text-blue-600 rounded-full"><ShoppingCart size={24} /></div><div><p className="text-slate-400 text-xs uppercase font-bold">Total Encomendas</p><h3 className="text-2xl font-bold text-ocean-950">{stats.orders}</h3></div></div>
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4"><div className="p-4 bg-purple-50 text-purple-600 rounded-full"><TrendingUp size={24} /></div><div><p className="text-slate-400 text-xs uppercase font-bold">Clientes</p><h3 className="text-2xl font-bold text-ocean-950">{stats.customers}</h3></div></div>
             </div>
-
-            {/* --- GRÁFICO DE VENDAS --- */}
+            {/* Gráfico */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
               <h3 className="text-lg font-serif text-ocean-950 mb-6">Evolução de Vendas</h3>
               <div className="h-80 w-full">
                 {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#C4A67C" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#C4A67C" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
+                      <defs><linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#C4A67C" stopOpacity={0.3}/><stop offset="95%" stopColor="#C4A67C" stopOpacity={0}/></linearGradient></defs>
                       <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                       <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `€${value}`} />
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
-                        itemStyle={{ color: '#C4A67C', fontWeight: 'bold' }}
-                      />
+                      <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} itemStyle={{ color: '#C4A67C', fontWeight: 'bold' }} />
                       <Area type="monotone" dataKey="vendas" stroke="#C4A67C" strokeWidth={3} fillOpacity={1} fill="url(#colorVendas)" />
                     </AreaChart>
                   </ResponsiveContainer>
-                ) : (
-                  <div className="h-full flex items-center justify-center text-slate-400 text-sm">
-                    Ainda não existem dados suficientes para o gráfico.
-                  </div>
-                )}
+                ) : (<div className="h-full flex items-center justify-center text-slate-400 text-sm">Ainda não existem dados suficientes para o gráfico.</div>)}
               </div>
             </div>
           </div>
@@ -318,6 +315,7 @@ export default function AdminPage() {
         {/* ENCOMENDAS */}
         {activeTab === 'orders' && (
           <div className="space-y-6 animate-fade-in">
+             {/* ... (mantém-se igual, código omitido para brevidade mas incluído na versão final) ... */}
              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <h2 className="text-2xl font-serif text-ocean-950">Encomendas</h2>
                 <div className="relative w-full md:w-64"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Pesquisar ID ou Cliente..." className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-full text-sm focus:outline-none focus:border-brand" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></div>
@@ -341,11 +339,14 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* MODAL */}
+        {/* MODAL (ATUALIZADO COM MATERIAIS E ENVIO) */}
         {showModal && (
           <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
             <div className="bg-white rounded-3xl p-6 w-full max-w-md animate-slide-down shadow-2xl max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6"><h3 className="font-serif text-xl text-ocean-950">{formData.id ? 'Editar Produto' : 'Novo Produto'}</h3><button onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button></div>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-serif text-xl text-ocean-950">{formData.id ? 'Editar Produto' : 'Novo Produto'}</h3>
+                <button onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button>
+              </div>
               <form onSubmit={handleSaveProduct} className="space-y-4">
                 <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Imagem</label>
@@ -353,9 +354,17 @@ export default function AdminPage() {
                     <div className="flex gap-2 items-center"><label className="flex-1 cursor-pointer bg-slate-50 border border-dashed border-slate-300 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-slate-100 transition-colors text-slate-500 hover:text-brand"><Upload size={24} className="mb-2" /><span className="text-xs font-medium">Carregar Ficheiro</span><input type="file" accept="image/*" onChange={handleImageChange} className="hidden" /></label><span className="text-xs text-slate-400 font-bold uppercase">OU</span><input placeholder="Colar URL" className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand" value={formData.image_url} onChange={e => { setFormData({...formData, image_url: e.target.value}); setPreviewUrl(e.target.value); }} /></div>
                 </div>
                 <div><label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Nome</label><input required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
-                <div className="flex gap-4"><div className="w-1/2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Preço (€)</label><input type="number" step="0.01" required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div><div className="w-1/2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Stock</label><input type="number" required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} /></div></div>
+                <div className="flex gap-4">
+                  <div className="w-1/2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Preço (€)</label><input type="number" step="0.01" required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div>
+                  <div className="w-1/2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Stock</label><input type="number" required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} /></div>
+                </div>
                 <div><label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Categoria</label><input required className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} /></div>
+                
+                {/* --- NOVOS CAMPOS --- */}
                 <div><label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Descrição</label><textarea rows="3" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand resize-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea></div>
+                <div><label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Materiais & Detalhes</label><textarea rows="2" placeholder="Ex: Banhado a ouro 18k..." className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand resize-none" value={formData.materials} onChange={e => setFormData({...formData, materials: e.target.value})}></textarea></div>
+                <div><label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Info de Envio</label><textarea rows="2" placeholder="Ex: Entrega em 24h..." className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand resize-none" value={formData.shipping_info} onChange={e => setFormData({...formData, shipping_info: e.target.value})}></textarea></div>
+
                 <button disabled={uploading} className="w-full bg-ocean-950 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-ocean-800 transition-all shadow-lg mt-2 flex items-center justify-center gap-2 disabled:opacity-70">{uploading ? 'A carregar imagem...' : <><Save size={18} /> {formData.id ? 'Guardar Alterações' : 'Criar Produto'}</>}</button>
               </form>
             </div>
