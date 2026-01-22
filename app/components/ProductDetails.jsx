@@ -6,6 +6,7 @@ import { ArrowLeft, ShoppingBag, Star, Share2, Heart, AlertCircle, Plus, Minus, 
 import toast from 'react-hot-toast';
 import { useCart } from '@/app/context/CartContext';
 import { useWishlist } from '@/app/context/WishlistContext';
+import Reviews from './Reviews'; // <--- 1. Importar o Componente de Reviews
 
 export default function ProductDetails({ product, relatedProducts = [] }) {
   const { addToCart } = useCart();
@@ -72,7 +73,7 @@ export default function ProductDetails({ product, relatedProducts = [] }) {
         )}
       </div>
 
-      {/* Conteúdo do Produto - Ultra Compacto em Mobile */}
+      {/* Conteúdo do Produto */}
       <div className="px-4 -mt-12 relative z-10 max-w-3xl mx-auto">
         <div className="bg-white rounded-[2rem] shadow-xl p-5 md:p-8 border border-slate-50 text-center">
           
@@ -119,7 +120,7 @@ export default function ProductDetails({ product, relatedProducts = [] }) {
               </button>
           </div>
 
-          {/* ABAS DE INFORMAÇÃO COMPACTAS */}
+          {/* ABAS DE INFORMAÇÃO */}
           <div className="mb-4">
             <div className="flex justify-center border-b border-slate-100 mb-3">
               {[
@@ -174,7 +175,7 @@ export default function ProductDetails({ product, relatedProducts = [] }) {
             </div>
           </div>
 
-          {/* ÁREA DE COMPRA UNIFICADA */}
+          {/* ÁREA DE COMPRA */}
           {!isOutOfStock && (
             <div className="mt-4 pt-4 border-t border-slate-50 flex flex-col gap-3">
               
@@ -217,6 +218,9 @@ export default function ProductDetails({ product, relatedProducts = [] }) {
               </button>
             </div>
           )}
+
+          {/* --- 2. INTEGRAR REVIEWS AQUI --- */}
+          <Reviews productId={product.id} />
 
         </div>
       </div>

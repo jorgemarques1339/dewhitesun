@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react'; // Adicionado useState
-import { Facebook, Instagram, Twitter, Mail, Loader2 } from 'lucide-react'; // Adicionado Loader2
+import { useState } from 'react';
+import { Facebook, Instagram, Twitter, Mail, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import toast from 'react-hot-toast'; // Adicionado Toast
+import toast from 'react-hot-toast';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
@@ -20,22 +20,36 @@ export default function Footer() {
     setLoading(true);
 
     try {
-      // Chamada à API para gravar o email (Vamos criar esta rota a seguir ou simular)
-      const res = await fetch('/api/newsletter', {
+      // ATUALIZAÇÃO AQUI: Caminho ajustado para onde o ficheiro foi criado
+      const res = await fetch('/api/checkout/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
 
+      // 1. Ler a resposta como texto primeiro para evitar erros de JSON.parse em HTML
+      const text = await res.text();
+      let data;
+      
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        // Se falhar, é porque recebemos HTML (Erro 404 ou 500)
+        console.error("❌ A API retornou HTML em vez de JSON:", text.substring(0, 100));
+        throw new Error("Erro de configuração da API (Verifique o caminho do ficheiro).");
+      }
+
       if (res.ok) {
-        toast.success('Inscrição confirmada! Bem-vindo ao clube.');
+        toast.success(data.message || 'Inscrição confirmada!');
         setEmail('');
       } else {
-        toast.error('Erro ao subscrever. Tente novamente.');
+        console.error("Erro Newsletter:", data);
+        toast.error(data.error || 'Erro ao subscrever.');
       }
     } catch (error) {
       console.error(error);
-      toast.error('Erro de conexão.');
+      // Mostra a mensagem de erro específica se for conhecida, senão genérica
+      toast.error(error.message === "Failed to fetch" ? "Erro de conexão." : error.message);
     } finally {
       setLoading(false);
     }
@@ -89,13 +103,13 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Coluna 4: Newsletter (AGORA FUNCIONAL) */}
+        {/* Coluna 4: Newsletter */}
         <div>
           <h4 className="font-serif text-lg mb-6 text-white relative inline-block">
             Newsletter
             <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-[#C4A67C]"></span>
           </h4>
-          <p className="text-ocean-100 text-xs mb-4 font-light opacity-80">Junte-se ao clube.</p>
+          <p className="text-ocean-100 text-xs mb-4 font-light opacity-80">Junte-se ao clube e receba as novidades.</p>
           <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
             <input 
               type="email" 
@@ -116,7 +130,7 @@ export default function Footer() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-ocean-400 font-light">
-        <p>&copy; {new Date().getFullYear()} DeWhiteSun. Marca Registada Nacional.</p>
+        <p>&copy; {new Date().getFullYear()} DeWhiteSun. Todos os direitos reservados.</p>
         <div className="flex items-center gap-3 opacity-60 grayscale hover:grayscale-0 transition-all">
             <span className="border border-white/20 px-2 py-1 rounded cursor-default">VISA</span>
             <span className="border border-white/20 px-2 py-1 rounded cursor-default">Mastercard</span>
